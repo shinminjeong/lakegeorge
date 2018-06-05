@@ -21,7 +21,7 @@ obs_records <- occurrences(wkt=wkt, fields=c("id", "latitude", "longitude", "tax
 summary(obs_records)
 
 # get Crimson Rosella (idx=1) for example
-idx <- 1
+idx <- 2
 
 name <- top10spc$commonName[idx]
 spc_name <- top10spc$speciesName[idx]
@@ -32,34 +32,43 @@ img <- info$thumbnailUrl
 print(sprintf("Searching record of %s (%s) %s", name, spc_name, taxon_id))
 obs <- occurrences(taxon=paste("taxon_concept_lsid:",taxon_id), wkt=wkt, fields=c("id", "latitude", "longitude", "taxon_concept_lsid", "common_name"), download_reason_id="testing")
 record_ids <- obs$data$id
-
-spc_data <- c()
 print(sprintf("Number of records = %d", length(record_ids)))
 
+d_date <- c()
+d_date_str <- c()
+d_log <- c()
+d_lat <- c()
+
 r_idx <- 1
-while (r_idx < length(record_ids)) {
-  print(sprintf("Searching record number %d ~ %d", r_idx, (r_idx+10)))
-  details <- occurrence_details(record_ids[r_idx:(r_idx+10)])
+while (r_idx <= length(record_ids)) {
+#while (r_idx < 10) { #for test
+  print(sprintf("Searching record number %d ~ %d", r_idx, min(length(record_ids), (r_idx+10))))
+  details <- try(occurrence_details(record_ids[r_idx:min(length(record_ids), (r_idx+10))]))
+  if (class(details) == "try-error") {
+    print("SERVER ERROR with the request")
+    next;
+  }
   for (entity in details) {
-    if (is.na(entity)) break
-    strdate <- strsplit(entity$raw$event$eventDate, "/")
-    d <- strdate[[1]][1]
-    eventDate <- as.Date(d, "%Y-%m-%d")
-    if (is.na(eventDate)) eventDate <- as.Date(d, "%a %b %d 00:00:00 EST %Y")
-    if (is.na(eventDate)) {
-      print(paste("ERROR date type", entity$raw$event$eventDate))
+    #print(entity$processed$event$eventDate)
+    if (is.null(entity$processed$event$eventDate)) {
+      print(paste("DATE ERROR invalid date type", entity$processed$event$eventDate))
+    } else if (is.na(entity$processed$location$decimalLongitude)){
+      print("NO LOCATION ERROR")
     } else {
-      #spc_data[[length(spc_data)+1]] <- list(eventDate, name, spc_name, taxon_id, entity$raw$location$decimalLatitude, entity$raw$location$decimalLongitude)
-      spc_data[[length(spc_data)+1]] <- eventDate
+      #spc_data[[length(spc_data)+1]] <- list(eventDate, name, spc_name, taxon_id, entity$processed$location$decimalLatitude, entity$processed$location$decimalLongitude, entity$processed$occurrence$individualCount)
+      #spc_data[[length(spc_data)+1]] <- eventDate
+      eventDate <- entity$processed$event$eventDate
+      d_date <- c(d_date, as.integer(gsub("-", "", eventDate)))
+      d_date_str <- c(d_date_str, eventDate)
+      d_log <- c(d_log, entity$processed$location$decimalLongitude)
+      d_lat <- c(d_lat, entity$processed$location$decimalLatitude)
     }
   }
   r_idx <- (r_idx+11)
 }
-filename <- sprintf("~/Work/lakegeorge/data/%s.Rdata", tail(strsplit(taxon_id, "/")[[1]], n=1))
-save(spc_data, file=filename)
 
-
-hist(spc_data, breaks=100)
-
-load(file="2899343.Rdata")
-hist(spc_data, breaks=100)
+spc_data <- data.frame(d_date, d_date_str, d_log, d_lat)
+filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
+filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
+save(spc_data, file=sprintf("~/Work/lakegeorge/data/%s.Rdata", filename_get_id))
+hist(d_date, breaks=100)
