@@ -20,8 +20,9 @@ d_date_aggr <- c()
 d_date_str_aggr <- c()
 d_lon_aggr <- c()
 d_lat_aggr <- c()
+d_group <- c()
 
-for (idx in 1:14) {
+for (idx in 1:20) {
   name <- top100spc$commonName[idx]
   spc_name <- top100spc$speciesName[idx]
   taxon_id <- top100spc$taxonConceptLsid[idx]
@@ -41,15 +42,27 @@ for (idx in 1:14) {
   d_date_str_aggr <- c(d_date_str_aggr, as.character(spc_data$d_date_str))
   d_lon_aggr <- c(d_lon_aggr, spc_data$d_log)
   d_lat_aggr <- c(d_lat_aggr, spc_data$d_lat)
+
+  if (idx %in% c(3,9,10,11,16)) { # ducks + swan
+    d_group <- c(d_group, rep("ducks", num_rows))
+  } else {
+    d_group <- c(d_group, rep("flying birds", num_rows))
+  }
 }
 
 d_year_aggr <- as.integer(substr(d_date_str_aggr, 1, 4))
 d_month_aggr <- substr(d_date_str_aggr, 1, 7)
 spc_aggr <- data.frame(name=d_name_aggr, spc_name=d_spc_name_aggr, taxon_id=d_taxon_id_aggr,
                        date=d_date_aggr, date_str=d_date_str_aggr, year=d_year_aggr, month=d_month_aggr,
-                       longitude=d_lon_aggr, latitude=d_lat_aggr)
+                       longitude=d_lon_aggr, latitude=d_lat_aggr, group=d_group)
 
-ggplot(spc_aggr, aes(x = year, fill = spc_name))+
+ggplot(spc_aggr, aes(x = year, fill = group))+
+  geom_bar( aes(y = ..count..*100/sum(..count..) ), position = 'fill')+
+  xlim(1970,2020)+
+  xlab("Time")+
+  ylab("Occurrence percentage")
+
+ggplot(spc_aggr, aes(x = year, fill = sprintf("%s (%s)", name, spc_name)))+
   #geom_bar( aes(y = ..count..*100/sum(..count..) ), position = 'fill')+
   #geom_bar( aes(y = ..count..*100/sum(..count..) ))+
   geom_bar( aes(y = ..count.. ))+
@@ -57,4 +70,9 @@ ggplot(spc_aggr, aes(x = year, fill = spc_name))+
   xlab("Time")+
   ylab("Occurrence percentage")
 
+ggplot(spc_aggr, aes(x=year, fill = sprintf("%s (%s)", name, spc_name))) +
+  geom_freqpoly()+
+  xlim(1970,2020)+
+  xlab("Time")+
+  ylab("Occurrence percentage")
 
