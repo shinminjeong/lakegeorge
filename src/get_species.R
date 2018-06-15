@@ -6,12 +6,16 @@ wkt <- "POLYGON((149.25 -34.9,149.25 -35.35,149.5 -35.35,149.5 -34.9,149.25 -34.
 
 # get list of species in the polygon
 spclist <- specieslist(wkt=wkt) %>%
-  dplyr::arrange(desc(occurrenceCount)) %>%
-  dplyr::select(taxonConceptLsid, speciesName, genus, commonName, occurrenceCount)
+  dplyr::arrange(desc(occurrenceCount)) #%>%
+  #dplyr::select(taxonConceptLsid, speciesName, genus, commonName, occurrenceCount)
 count = spclist$occurrenceCount
+
+kingdom_animal <- spclist %>% dplyr::filter(kingdom=="ANIMALIA")
+kingdom_plant <- spclist %>% dplyr::filter(kingdom=="Plantae")
 cat("Total occurrence count", sum(count))
 
-top100spc <- spclist %>% head(100)
+#top100spc <- spclist %>% head(100)
+top100spc <- kingdom_plant
 str(top100spc$taxonConceptLsid)
 str(top100spc$genus)
 str(top100spc$speciesName)
@@ -20,7 +24,7 @@ obs_records <- occurrences(wkt=wkt, fields=c("id", "latitude", "longitude", "tax
 summary(obs_records)
 
 # idx <- 2
-for (idx in 15:20){
+for (idx in 87:100){
   print(idx)
   name <- top100spc$commonName[idx]
   spc_name <- top100spc$speciesName[idx]
@@ -67,5 +71,5 @@ for (idx in 15:20){
   spc_data <- data.frame(d_date, d_date_str, d_log, d_lat)
   filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
   filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
-  save(spc_data, file=sprintf("~/Work/lakegeorge/data/%d-%s.Rdata", idx, filename_get_id))
+  save(spc_data, file=sprintf("~/Work/lakegeorge/data/plant-%d-%s.Rdata", idx, filename_get_id))
 }
