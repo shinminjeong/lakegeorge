@@ -71,5 +71,5 @@ for (idx in 87:100){
   spc_data <- data.frame(d_date, d_date_str, d_log, d_lat)
   filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
   filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
-  save(spc_data, file=sprintf("~/Work/lakegeorge/data/plant-%d-%s.Rdata", idx, filename_get_id))
+  save(spc_data, file=sprintf("%s/data/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
 }
