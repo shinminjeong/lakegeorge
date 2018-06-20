@@ -37,7 +37,8 @@ ggplot(kingdom_plant, aes(x = class, fill = class))+
 
 
 #top100spc <- spclist %>% head(100)
-top100spc <- kingdom_plant
+# top100spc <- kingdom_plant
+top100spc <- kingdom_animal
 
 d_name_aggr <- c()
 
@@ -56,7 +57,8 @@ d_lon_aggr <- c()
 d_lat_aggr <- c()
 d_group <- c()
 
-for (idx in 1:100) {
+# for (idx in 1:100) {
+for (idx in 1:22) {
   name <- top100spc$commonName[idx]
   species <- top100spc$speciesName[idx]
   genus <- top100spc$genus[idx]
@@ -76,7 +78,8 @@ for (idx in 1:100) {
   
   filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
   filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
-  load(sprintf("%s/data/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
+  # load(sprintf("%s/data/lakegeorge/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
+  load(sprintf("%s/data/lakegeorge/%d-%s.Rdata", getwd(), idx, filename_get_id))
   
   num_rows = nrow(spc_data)
   d_name_aggr <- c(d_name_aggr, rep(name, num_rows))
@@ -92,8 +95,8 @@ for (idx in 1:100) {
   
   d_date_aggr <- c(d_date_aggr, spc_data$d_date)
   d_date_str_aggr <- c(d_date_str_aggr, as.character(spc_data$d_date_str))
-  d_lon_aggr <- c(d_lon_aggr, spc_data$d_log)
-  d_lat_aggr <- c(d_lat_aggr, spc_data$d_lat)
+  d_lon_aggr <- c(d_lon_aggr, as.character(spc_data$d_log))
+  d_lat_aggr <- c(d_lat_aggr, as.character(spc_data$d_lat))
 
 #  if (idx %in% c(3,6,9,10,11,16)) { # ducks + swan
 #    d_group <- c(d_group, rep("ducks", num_rows))
@@ -109,7 +112,8 @@ spc_aggr <- data.frame(name=d_name_aggr, taxon_id=d_taxon_id_aggr,
                        date=d_date_aggr, date_str=d_date_str_aggr, year=d_year_aggr, month=d_month_aggr,
                        longitude=d_lon_aggr, latitude=d_lat_aggr)
 
-save(spc_aggr, file=sprintf("%s/data/%s.Rdata", getwd(), "plant_aggr"))
+# save(spc_aggr, file=sprintf("%s/data/lakegeorge/%s.Rdata", getwd(), "plant_aggr"))
+save(spc_aggr, file=sprintf("%s/data/lakegeorge/%s.Rdata", getwd(), "animal_aggr"))
 
 month_range <- c()
 for (y in 1986:2018) {

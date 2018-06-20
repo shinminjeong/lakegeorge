@@ -2,7 +2,7 @@ library(ALA4R)
 library(magrittr)
 library(ggplot2)
 
-load(sprintf("%s/data/plant_aggr.Rdata", getwd()))
+load(sprintf("%s/data/lakegeorge/animal_aggr.Rdata", getwd()))
 
 # 1986 to 2018
 lakeg_water <- c(0, 0, 20, 80, 100, 95, 95, 93, 93, 92, 85, 80, 70, 60, 20, 0, 10 , 0, 15, 5, 30, 35, 20, 30, 40, 55, 75, 50, 15, 30, 25, 15, 0)
@@ -39,20 +39,30 @@ ggplot()+
 
 
 # year plot order lines
-# order_group <- c("Apiales", "Asparagales", "Asterales", "Caryophyllales", "Celastrales", "Ericales", "Fabales",
-#                  "Gentianales", "Geraniales", "Lamiales", "Liliales", "Malpighiales", "Malvales", "Myrtales",
-#                  "Oxalidales", "Poales", "Rosales", "Santalales", "Saxifragales", "Solanales")
-# order_group <- c("Apiales", "Asparagales", "Asterales", "Caryophyllales", "Celastrales", "Ericales", "Fabales")
-# order_group <- c("Gentianales", "Geraniales", "Lamiales", "Liliales", "Malpighiales", "Malvales", "Myrtales")
-order_group <- c("Oxalidales", "Poales", "Rosales", "Santalales", "Saxifragales", "Solanales")
 ggplot()+
-  geom_line(data=orderdiv[orderdiv$order %in% order_group,], aes(x=as.POSIXct(as.character(year), format = "%Y"), y=Freq/yeardiv$Freq*100, color=order, group=order))+
+  geom_line(data=orderdiv, aes(x=as.POSIXct(as.character(year), format = "%Y"), y=Freq/yeardiv$Freq*100, color=order, group=order))+
   geom_line(data=lakegeorge, aes(x=as.POSIXct(as.character(year), format = "%Y"), y=water)) +
   # geom_line(data=orderdiv[which(orderdiv$order=="Poales"),], aes(x=year, y=Freq/yeardiv$Freq, group=order), position="jitter")+
   scale_x_datetime(limits = lims)+
   scale_y_continuous(sec.axis= sec_axis(~./100, name="Occurence normalized by year"))+
   xlab("Time")+
   ylab("Water")
+
+
+# year plot order lines
+order_filter = "ANSERIFORMES"
+selected_order <- spc_aggr %>% dplyr::filter(order==order_filter) %>% droplevels
+yeardiv = data.frame(table(year=selected_order$year))
+specdiv = data.frame(table(year=selected_order$year, species=selected_order$name))
+ggplot()+
+  geom_line(data=specdiv, aes(x=as.POSIXct(as.character(year), format = "%Y"), y=Freq/yeardiv$Freq*100, color=species, group=species))+
+  geom_line(data=lakegeorge, aes(x=as.POSIXct(as.character(year), format = "%Y"), y=water)) +
+  ggtitle(order_filter)+
+  scale_x_datetime(limits = lims)+
+  scale_y_continuous(sec.axis= sec_axis(~./100, name="Occurence normalized by year"))+
+  xlab("Time")+
+  ylab("Water")
+
 
 
 ggplot(orderdiv, aes(x=as.POSIXct(as.character(year), format = "%Y"), y=Freq/yeardiv$Freq, color=order, group=order))+

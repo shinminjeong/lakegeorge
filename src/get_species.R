@@ -15,7 +15,8 @@ kingdom_plant <- spclist %>% dplyr::filter(kingdom=="Plantae")
 cat("Total occurrence count", sum(count))
 
 #top100spc <- spclist %>% head(100)
-top100spc <- kingdom_plant
+# top100spc <- kingdom_plant
+top100spc <- kingdom_animal
 str(top100spc$taxonConceptLsid)
 str(top100spc$genus)
 str(top100spc$speciesName)
@@ -24,7 +25,7 @@ obs_records <- occurrences(wkt=wkt, fields=c("id", "latitude", "longitude", "tax
 summary(obs_records)
 
 # idx <- 2
-for (idx in 87:100){
+for (idx in 22:30){
   print(idx)
   name <- top100spc$commonName[idx]
   spc_name <- top100spc$speciesName[idx]
@@ -71,5 +72,6 @@ for (idx in 87:100){
   spc_data <- data.frame(d_date, d_date_str, d_log, d_lat)
   filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
   filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
-  save(spc_data, file=sprintf("%s/data/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
+  # save(spc_data, file=sprintf("%s/data/lakegeorge/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
+  save(spc_data, file=sprintf("%s/data/lakegeorge/%d-%s.Rdata", getwd(), idx, filename_get_id))
 }
