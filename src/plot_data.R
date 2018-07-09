@@ -2,8 +2,14 @@ library(ALA4R)
 library(magrittr)
 library(ggplot2)
 
-# Lake George polygon 
-wkt <- "POLYGON((149.25 -34.9,149.25 -35.35,149.5 -35.35,149.5 -34.9,149.25 -34.9))"
+lakestr <- "Lake Eyre"
+lakename <- "lakeeyre"
+
+# Lake George polygon
+# wkt <- "POLYGON((149.25 -34.9,149.25 -35.35,149.5 -35.35,149.5 -34.9,149.25 -34.9))"
+
+# Lake Eyre polygon
+wkt <- "POLYGON((136.5 -27.7,138.3 -27.7,138.3 -29.6,136.5 -29.6,136.5 -27.7))"
 
 # get list of species in the polygon
 spclist <- specieslist(wkt=wkt) %>%
@@ -11,7 +17,7 @@ spclist <- specieslist(wkt=wkt) %>%
 count = spclist$occurrenceCount
 
 # kingdom histogram
-barplot(table(spclist$kingdom), main="Lake George Kingdom Distribution")
+barplot(table(spclist$kingdom), main=sprintf("%s Kingdom Distribution", lakestr))
 
 kingdom_animal <- spclist %>% dplyr::filter(kingdom=="ANIMALIA")
 kingdom_plant <- spclist %>% dplyr::filter(kingdom=="Plantae")
@@ -36,9 +42,11 @@ ggplot(kingdom_plant, aes(x = class, fill = class))+
   scale_x_discrete(position = "top")
 
 
+class_birds <- kingdom_animal %>% dplyr::filter(class=="AVES")
 #top100spc <- spclist %>% head(100)
 # top100spc <- kingdom_plant
-top100spc <- kingdom_animal
+# top100spc <- kingdom_animal
+top100spc <- class_birds
 
 d_name_aggr <- c()
 
@@ -57,8 +65,8 @@ d_lon_aggr <- c()
 d_lat_aggr <- c()
 d_group <- c()
 
-# for (idx in 1:100) {
-for (idx in 1:22) {
+for (idx in 1:10) {
+# for (idx in 1:20) {
   name <- top100spc$commonName[idx]
   species <- top100spc$speciesName[idx]
   genus <- top100spc$genus[idx]
@@ -78,8 +86,8 @@ for (idx in 1:22) {
   
   filename_remove_slash <- tail(strsplit(taxon_id, "/")[[1]], n=1)
   filename_get_id <- tail(strsplit(filename_remove_slash, ":")[[1]], n=1)
-  # load(sprintf("%s/data/lakegeorge/plant-%d-%s.Rdata", getwd(), idx, filename_get_id))
-  load(sprintf("%s/data/lakegeorge/%d-%s.Rdata", getwd(), idx, filename_get_id))
+  # load(sprintf("%s/data/%s/plant-%d-%s.Rdata", getwd(), lakename, idx, filename_get_id))
+  load(sprintf("%s/data/%s/bird-%d-%s.Rdata", getwd(), lakename, idx, filename_get_id))
   
   num_rows = nrow(spc_data)
   d_name_aggr <- c(d_name_aggr, rep(name, num_rows))
@@ -112,8 +120,8 @@ spc_aggr <- data.frame(name=d_name_aggr, taxon_id=d_taxon_id_aggr,
                        date=d_date_aggr, date_str=d_date_str_aggr, year=d_year_aggr, month=d_month_aggr,
                        longitude=d_lon_aggr, latitude=d_lat_aggr)
 
-# save(spc_aggr, file=sprintf("%s/data/lakegeorge/%s.Rdata", getwd(), "plant_aggr"))
-save(spc_aggr, file=sprintf("%s/data/lakegeorge/%s.Rdata", getwd(), "animal_aggr"))
+# save(spc_aggr, file=sprintf("%s/data/%s/%s.Rdata", getwd(), lakename, "plant_aggr"))
+save(spc_aggr, file=sprintf("%s/data/%s/%s.Rdata", getwd(), lakename, "bird_aggr"))
 
 month_range <- c()
 for (y in 1986:2018) {
